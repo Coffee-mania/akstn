@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#2b211b">
+<meta name="robots" content="noindex,nofollow">
+<title>焙煎注文票｜生豆在庫</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Kaisei+Tokumin:wght@700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ---------- tokens ----------
+   sheet  #eef0e9  カッピングシートの紙
+   card   #f8f8f4
+   bean   #8fa483  生豆の淡い緑（選択・主ボタン）
+   bean2  #5f7454  生豆の濃い緑（数量の強調）
+   jute   #c9b893  麻袋の点線・罫
+   ink    #2b211b  深煎り
+   ------------------------------- */
+*,*::before,*::after{box-sizing:border-box}
+:root{
+  --sheet:#eef0e9; --card:#f8f8f4; --well:#e4e7dd;
+  --bean:#8fa483; --bean2:#5f7454; --bean3:#eef2ea; --jute:#c9b893; --jute2:#e0d7c2;
+  --ink:#2b211b; --ink2:#6e655c; --ink3:#9b9187;
+  --line-green:#06c755;
+  --disp:"Kaisei Tokumin","Hiragino Mincho ProN","Yu Mincho","Noto Serif JP",serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --sans:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP","Yu Gothic UI",system-ui,sans-serif;
+}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--sheet);color:var(--ink);font-family:var(--sans);line-height:1.6;
+  padding-bottom:calc(96px + env(safe-area-inset-bottom))}
+.wrap{max-width:620px;margin:0 auto;padding:0 16px}
+button{font-family:inherit}
+:focus-visible{outline:2px solid var(--bean2);outline-offset:2px}
+
+/* ---------- header ---------- */
+.top{padding:26px 0 16px;border-bottom:2px solid var(--ink)}
+.stamp{margin:0;font-family:var(--mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--ink2);display:flex;justify-content:space-between;gap:8px}
+.stamp b{font-weight:500;color:var(--ink)}
+h1{margin:6px 0 8px;font-family:var(--disp);font-weight:700;font-size:34px;letter-spacing:.08em;line-height:1.15}
+.lead{margin:0;font-size:13px;color:var(--ink2);line-height:1.8}
+
+/* ---------- roast legend ---------- */
+.legend{margin:14px 0 0;border:1px solid var(--jute2);border-radius:6px;background:var(--card)}
+.legend summary{list-style:none;cursor:pointer;padding:10px 14px;display:flex;align-items:center;gap:10px;font-size:13px;font-weight:600;-webkit-tap-highlight-color:transparent}
+.legend summary::-webkit-details-marker{display:none}
+.legend summary .mark{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink2);font-weight:500}
+.legend summary::after{content:"＋";margin-left:auto;font-family:var(--mono);color:var(--ink2)}
+.legend[open] summary::after{content:"−"}
+.legend ol{list-style:none;margin:0;padding:2px 14px 12px}
+.legend li{display:flex;align-items:flex-start;gap:10px;padding:7px 0;border-top:1px dotted var(--jute2);font-size:13px;line-height:1.5}
+.legend li b{display:block;font-weight:600}
+.legend li span{color:var(--ink2);font-size:12px}
+.legend li b small{font-weight:400;color:var(--ink2);margin-left:4px}
+
+/* ---------- roast swatch (共通) ---------- */
+.sw{height:34px;width:100%;min-width:30px;border-radius:7px;border:1px solid rgba(43,33,27,.18);background:var(--c);color:#fff;font-family:var(--mono);font-size:13px;font-weight:500;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
+.sw.light{color:var(--ink)}
+.sw.on{box-shadow:0 0 0 2px var(--card),0 0 0 4px var(--ink)}
+.legend .sw{width:30px;height:30px;flex:none;font-size:12px;cursor:default}
+
+/* ---------- country ---------- */
+.country{margin-top:28px}
+.country-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;padding-bottom:6px;border-bottom:1px solid var(--ink)}
+.country-head h2{margin:0;font-family:var(--disp);font-weight:700;font-size:21px;letter-spacing:.1em}
+.country-head .mark{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink2);white-space:nowrap}
+
+/* ---------- bean card ---------- */
+.bean{background:var(--card);border:1px solid var(--jute2);border-left:4px solid var(--jute2);border-radius:6px;padding:12px 12px 8px 14px;margin-top:10px;transition:border-color .15s}
+.bean.selected{border-left-color:var(--bean2);border-color:var(--bean)}
+.bean-name{margin:0 0 8px;font-size:15px;font-weight:600;line-height:1.5;word-break:break-word}
+.scale{display:grid;grid-template-columns:repeat(8,1fr);gap:5px;max-width:340px}
+.scale.nudge{animation:nudge .35s}
+@keyframes nudge{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+.cell{display:flex;flex-direction:column;align-items:center;gap:2px}
+.lbl{display:none;font-size:10px;color:var(--ink2);white-space:nowrap}
+@media (min-width:460px){ .lbl{display:block} }
+.roast-label{margin:6px 0 4px;font-size:13px;min-height:20px;display:flex;align-items:center;gap:6px}
+.roast-label .num{font-family:var(--mono);font-size:12px;color:var(--ink2)}
+.roast-label.empty{color:var(--ink3)}
+.rows.off{opacity:.45}
+.row{display:flex;align-items:center;gap:10px;padding:5px 0}
+.row + .row{border-top:1px dotted var(--jute2)}
+.size{font-family:var(--mono);font-size:13px;color:var(--ink2);width:40px;flex:none}
+.leader{flex:1;align-self:stretch;border-bottom:1px dotted var(--jute);margin-bottom:7px}
+.price{font-family:var(--mono);font-size:16px;font-weight:500;font-variant-numeric:tabular-nums;flex:none;min-width:64px;text-align:right}
+.stepper{display:inline-flex;align-items:center;gap:2px;flex:none}
+.step{width:34px;height:34px;border-radius:50%;border:1px solid var(--jute);background:#fff;color:var(--ink);font-size:19px;line-height:1;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;padding:0;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
+.step:active{background:var(--bean);border-color:var(--bean)}
+.count{min-width:28px;text-align:center;font-family:var(--mono);font-size:17px;font-weight:500;font-variant-numeric:tabular-nums;color:var(--ink3)}
+.count.on{color:var(--bean2)}
+@media (max-width:360px){ .leader{display:none} .price{min-width:56px} }
+.picked{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 2px}
+.picked:empty{display:none}
+.pick{font-size:12px;line-height:1.4;border:1px solid var(--jute);border-radius:999px;padding:3px 10px;background:#fff;color:var(--ink2);cursor:pointer;display:inline-flex;align-items:center;gap:5px;-webkit-tap-highlight-color:transparent}
+.pick .dot{width:10px;height:10px;border-radius:50%;background:var(--c);border:1px solid rgba(43,33,27,.18)}
+.pick.on{border-color:var(--bean2);background:var(--bean3);color:var(--bean2)}
+
+.foot{margin:40px 0 10px;padding-top:12px;border-top:1px solid var(--jute);font-size:12px;color:var(--ink3);line-height:1.8}
+.foot .mono{font-family:var(--mono);letter-spacing:.1em}
+
+/* ---------- bottom bar ---------- */
+.bar{position:fixed;left:0;right:0;bottom:0;background:var(--ink);color:var(--sheet);padding:10px 16px calc(10px + env(safe-area-inset-bottom));z-index:20}
+.bar-in{max-width:620px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.bar-total{display:flex;flex-direction:column;line-height:1.15}
+.bar-count{font-family:var(--mono);font-size:11px;letter-spacing:.12em;color:#b9b0a3}
+.bar-sum{font-family:var(--mono);font-size:24px;font-weight:500;font-variant-numeric:tabular-nums}
+.btn{appearance:none;border:0;border-radius:4px;padding:13px 20px;font-size:15px;font-weight:700;cursor:pointer;letter-spacing:.04em;-webkit-tap-highlight-color:transparent}
+.btn-primary{background:var(--bean);color:var(--ink)}
+.btn-primary:active{background:var(--bean2);color:#fff}
+.btn-primary:disabled{opacity:.35;cursor:default}
+.btn-line{background:var(--line-green);color:#fff;text-decoration:none;display:inline-flex;align-items:center;justify-content:center}
+
+/* ---------- order sheet ---------- */
+.sheet{position:fixed;inset:0;background:rgba(43,33,27,.55);display:flex;align-items:flex-end;justify-content:center;z-index:30}
+.sheet[hidden]{display:none}
+.sheet-in{background:var(--sheet);width:100%;max-width:620px;max-height:92vh;max-height:92dvh;overflow:auto;border-radius:14px 14px 0 0;padding:16px 18px calc(22px + env(safe-area-inset-bottom));border-top:2px solid var(--ink)}
+.sheet-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
+.sheet-head h3{margin:0;font-family:var(--disp);font-size:22px;font-weight:700;letter-spacing:.08em}
+.x{background:none;border:0;font-size:24px;color:var(--ink2);cursor:pointer;padding:2px 8px;line-height:1}
+.f{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.12em;color:var(--ink2);margin:14px 0 5px}
+.in{width:100%;font:16px/1.5 var(--sans);padding:10px 12px;border:1px solid var(--jute);border-radius:4px;background:#fff;color:var(--ink)}
+textarea.in{resize:vertical;min-height:250px;background:var(--card);font-size:14px;line-height:1.7}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.actions .btn{padding:14px 10px}
+.hint{font-size:12px;color:var(--ink3);margin:10px 0 0;line-height:1.7}
+.clear{margin-top:14px;text-align:center}
+.clear button{background:none;border:0;color:var(--ink3);font-size:12px;text-decoration:underline;cursor:pointer;padding:6px}
+
+.toast{position:fixed;left:50%;bottom:calc(108px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(6px);background:var(--ink);color:var(--sheet);padding:9px 16px;border-radius:4px;font-size:13px;opacity:0;transition:opacity .2s,transform .2s;pointer-events:none;z-index:40;white-space:nowrap;max-width:92vw}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+@media (prefers-reduced-motion:reduce){ *{transition:none!important;animation:none!important} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <p class="stamp"><span>Green bean stock</span><b id="updated"></b></p>
+    <h1>焙煎注文票</h1>
+    <p class="lead">銘柄ごとに焙煎度（1〜8）を選んでから、250g／500gの数量を＋で入れます。同じ銘柄で焙煎度を変えて複数注文もできます。価格は生豆250gあたり、焙煎代込み。500gは250g価格×2−200円。最後に「注文内容を作成」を押すと、LINEに貼って送れる注文文ができます。</p>
+  </header>
+
+  <details class="legend" id="legend">
+    <summary><span class="mark">Roast level</span>焙煎度の目安（8段階）</summary>
+    <ol id="legendList"></ol>
+  </details>
+
+  <main id="list"></main>
+
+  <footer class="foot">
+    <span class="mono">PRICING</span>　生豆単価（250gあたり）×1.5＋300〜350円を50円単位に調整。<br>
+    銘柄・価格は生豆の仕入れ状況により変わります。
+  </footer>
+</div>
+
+<div class="bar">
+  <div class="bar-in">
+    <div class="bar-total">
+      <span class="bar-count" id="barCount">まだ選択なし</span>
+      <span class="bar-sum" id="barSum">¥0</span>
+    </div>
+    <button class="btn btn-primary" id="openBtn" type="button" disabled>注文内容を作成</button>
+  </div>
+</div>
+
+<div class="sheet" id="sheet" hidden>
+  <div class="sheet-in" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+    <div class="sheet-head">
+      <h3 id="sheetTitle">注文内容</h3>
+      <button class="x" id="closeBtn" type="button" aria-label="閉じる">×</button>
+    </div>
+    <label class="f" for="nameIn">NAME／お名前</label>
+    <input class="in" id="nameIn" type="text" autocomplete="name" placeholder="例：山田">
+    <label class="f" for="memoIn">NOTE／備考（受け取り方法・挽き方など）</label>
+    <input class="in" id="memoIn" type="text" placeholder="例：来週末に取りに行きます">
+    <label class="f" for="orderText">ORDER／注文文（このままLINEに貼れます）</label>
+    <textarea class="in" id="orderText" readonly></textarea>
+    <div class="actions">
+      <button class="btn btn-primary" id="copyBtn" type="button">注文文をコピー</button>
+      <a class="btn btn-line" id="lineBtn" href="#" target="_blank" rel="noopener">LINEで送る</a>
+    </div>
+    <p class="hint">「注文文をコピー」→ LINEのトークに貼り付けて送信。または「LINEで送る」→ 送り先を選んで送信。</p>
+    <div class="clear"><button type="button" id="clearBtn">選択をすべてクリア</button></div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+/* ============================================================
+   銘柄データ ── 更新するのはここだけ
+   price = 生豆250gあたりの焙煎価格（円）。500g価格は自動計算（×2−200）。
+   価格ルール：生豆1kg単価 ÷ 4 × 1.5 ＋ 300〜350円 → 50円単位に丸め
+   売り切れ → その行を消す。新しい国 → { country: "国名", items: [...] } を追加。
+   price が無い／0 の銘柄はページに表示されません。
+   ============================================================ */
+const UPDATED = "2026.08.20";
+
+const BEANS = [
+  { country: "エチオピア", items: [
+    { name: "カッファ マザーツリー ボンガ ウォッシュ G1", price: 1200 },
+    { name: "Co-NECT グジ シャキッソ ゴールデンハニー G1", price: 2600 },
+  ]},
+  { country: "ウガンダ", items: [
+    { name: "ルウェンゾリ ドンキー アフリカンムーン ナチュラル A", price: 1400 },
+    { name: "マウントエルゴン カプチョルワウォッシングステーション ブラックハニー A", price: 1400 },
+    { name: "マウントエルゴン カプチョルワウォッシングステーション ウォッシュ A", price: 1350 },
+    { name: "ルウェンゾリ ドンキー アフリカンスノー ウォッシュ A", price: 1400 },
+    { name: "ダーレー社 マウントエルゴン アナナス パイナップルファーメンテーション ナチュラル【脱炭素プロジェクト】", price: 1400 },
+    { name: "ダーレー社 マウントエルゴン ムクホト アナエロビックナチュラル【脱炭素プロジェクト】", price: 1400 },
+    { name: "ダーレー社 マウントエルゴン ブヤジ アナエロビックナチュラル【脱炭素プロジェクト】", price: 1400 },
+  ]},
+  { country: "ルワンダ", items: [
+    { name: "ジュルコーヒー フリーウォッシュ AA", price: 1300 },
+    { name: "ウーマンコーヒー TUK農協 フリーウォッシュ A", price: 1200 },
+  ]},
+  { country: "ニカラグア", items: [
+    { name: "マイクロロット サンタマリア・デ・ロールデス農園 マルセレサ アナエロビックナチュラル SHG", price: 1500 },
+  ]},
+  { country: "ケニア", items: [
+    { name: "マサイAA ウォッシュド", price: 1350 },
+    { name: "ニエリ オタヤ農協 ガチュヤニファクトリー ウォッシュ AB", price: 1450 },
+    { name: "キリニャガ ティリクワ農協 ガクユイニファクトリー ウォッシュ AA", price: 1500 },
+  ]},
+  { country: "インド", items: [
+    { name: "パパクチ農園 ファインロブスタ ウォッシュ A", price: 1150 },
+  ]},
+  { country: "コロンビア", items: [
+    { name: "ウィラ ラス モラス アナエロビックウォッシュ エクセルソ EP", price: 1350 },
+  ]},
+  { country: "ザンビア", items: [
+    { name: "マウント・スンズ農園 ウォッシュ AA", price: 1400 },
+  ]},
+  { country: "イエメン", items: [
+    { name: "モカハラズ シャムス ナチュラル", price: 1650 },
+    { name: "モカマタリ フルーツショコラタ ナチュラル", price: 1700 },
+  ]},
+];
+
+/* 国名の英字表記（見出しの麻袋スタンプ用・無い国は空欄になるだけ） */
+const EN = {
+  "エチオピア":"Ethiopia","ウガンダ":"Uganda","ルワンダ":"Rwanda","ニカラグア":"Nicaragua","グアテマラ":"Guatemala",
+  "ケニア":"Kenya","インド":"India","タイ":"Thailand","コスタリカ":"Costa Rica","エルサルバドル":"El Salvador",
+  "コロンビア":"Colombia","タンザニア":"Tanzania","ザンビア":"Zambia","メキシコ":"Mexico","パナマ":"Panama",
+  "インドネシア":"Indonesia","ブラジル":"Brazil","イエメン":"Yemen","ペルー":"Peru","中国":"China","ラオス":"Laos",
+  "マラウィ":"Malawi","マラウイ":"Malawi","ホンジュラス":"Honduras","ボリビア":"Bolivia","エクアドル":"Ecuador",
+  "ブルンジ":"Burundi","コンゴ":"Congo","パプアニューギニア":"Papua New Guinea","ベトナム":"Vietnam","ミャンマー":"Myanmar",
+};
+
+/* 焙煎度 8段階（浅 → 深） */
+const ROASTS = [
+  { n:1, mark:"①", short:"ライト",     name:"ライトロースト",     ja:"極浅煎り",      color:"#caa77a", light:true,  desc:"最も浅い。酸味がとても強く、苦みはほぼない。豆の個性がそのまま出る" },
+  { n:2, mark:"②", short:"シナモン",   name:"シナモンロースト",   ja:"浅煎り",        color:"#b88b5a", light:true,  desc:"軽くすっきり。酸味がはっきり立つ" },
+  { n:3, mark:"③", short:"ミディアム", name:"ミディアムロースト", ja:"中浅煎り",      color:"#a1714a", light:true,  desc:"香ばしさが出はじめるが、まだ酸味が主役" },
+  { n:4, mark:"④", short:"ハイ",       name:"ハイロースト",       ja:"中煎り",        color:"#875838", light:false, desc:"酸味と苦みのバランス型。いわゆる中煎り" },
+  { n:5, mark:"⑤", short:"シティ",     name:"シティロースト",     ja:"中深煎り",      color:"#6d432a", light:false, desc:"苦みがやや前に。コクと甘みが乗る" },
+  { n:6, mark:"⑥", short:"フルシティ", name:"フルシティロースト", ja:"中深〜深煎り",  color:"#52301e", light:false, desc:"しっかりした苦みとコク。表面に油がにじむ。アイスやカフェオレにも" },
+  { n:7, mark:"⑦", short:"フレンチ",   name:"フレンチロースト",   ja:"深煎り",        color:"#382016", light:false, desc:"酸味はほぼなく、強い苦みと香ばしさ" },
+  { n:8, mark:"⑧", short:"イタリアン", name:"イタリアンロースト", ja:"極深煎り",      color:"#21140f", light:false, desc:"最も深く、黒に近い。強い苦みとコク。エスプレッソ向き" },
+];
+
+/* ===================== ここから下は触らなくてOK ===================== */
+const price500 = p => p * 2 - 200;
+const yen   = n => "¥" + n.toLocaleString("ja-JP");
+const yenJa = n => n.toLocaleString("ja-JP") + "円";
+const keyOf = (c, n) => c + "｜" + n;
+const esc = s => String(s).replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+const $ = id => document.getElementById(id);
+const ROAST = Object.fromEntries(ROASTS.map(r => [r.n, r]));
+
+const listEl = $("list"), barCount = $("barCount"), barSum = $("barSum"), openBtn = $("openBtn");
+const sheet = $("sheet"), nameIn = $("nameIn"), memoIn = $("memoIn"), orderText = $("orderText"), lineBtn = $("lineBtn");
+
+const STORE = "roastOrder.v2";
+let state = {};   // key -> { active: 1..8|null, q: { [n]: { s250, s500 } } }
+
+const blank = () => ({ active: null, q: {} });
+const qOf = (s, n) => (s.q[n] = s.q[n] || { s250: 0, s500: 0 });
+
+function load(){                    // 端末内に選択内容を保持（LINEとの行き来で消えないように）
+  try{
+    const d = JSON.parse(localStorage.getItem(STORE) || "null");
+    if(!d) return;
+    if(d.state && typeof d.state === "object") state = d.state;
+    if(typeof d.name === "string") nameIn.value = d.name;
+    if(typeof d.memo === "string") memoIn.value = d.memo;
+  }catch(e){}
+}
+function save(){
+  try{ localStorage.setItem(STORE, JSON.stringify({ state, name: nameIn.value, memo: memoIn.value })); }catch(e){}
+}
+
+function visibleGroups(){
+  return BEANS.map(g => ({ country: g.country, items: (g.items || []).filter(it => it && it.name && it.price > 0) }))
+              .filter(g => g.items.length);
+}
+
+function swatch(r, key){
+  return `<div class="cell"><button type="button" class="sw${r.light ? " light" : ""}" style="--c:${r.color}" data-key="${esc(key)}" data-n="${r.n}" role="radio" aria-checked="false" aria-label="${r.n} ${r.name}（${r.ja}）">${r.n}</button><span class="lbl">${r.short}</span></div>`;
+}
+function sizeRow(key, size, label, price){
+  const k = esc(key);
+  return `<div class="row">
+    <span class="size">${label}</span>
+    <span class="leader" aria-hidden="true"></span>
+    <span class="price">${yen(price)}</span>
+    <span class="stepper">
+      <button type="button" class="step" data-key="${k}" data-size="${size}" data-d="-1" aria-label="${label}を1つ減らす">−</button>
+      <span class="count" data-count="${size}">0</span>
+      <button type="button" class="step" data-key="${k}" data-size="${size}" data-d="1" aria-label="${label}を1つ増やす">+</button>
+    </span>
+  </div>`;
+}
+
+function renderLegend(){
+  $("legendList").innerHTML = ROASTS.map(r =>
+    `<li><span class="sw${r.light ? " light" : ""}" style="--c:${r.color}" aria-hidden="true">${r.n}</span><div><b>${r.name}<small>${r.ja}</small></b><span>${r.desc}</span></div></li>`).join("");
+}
+
+function render(){
+  $("updated").textContent = UPDATED;
+  renderLegend();
+  const valid = new Set();
+  const frag = document.createDocumentFragment();
+  visibleGroups().forEach(g => {
+    const sec = document.createElement("section");
+    sec.className = "country";
+    const en = EN[g.country] ? EN[g.country] + " · " : "";
+    sec.innerHTML = `<div class="country-head"><h2>${esc(g.country)}</h2><span class="mark">${esc(en)}${g.items.length} lots</span></div>`;
+    g.items.forEach(it => {
+      const key = keyOf(g.country, it.name);
+      valid.add(key);
+      if(!state[key] || typeof state[key] !== "object" || !state[key].q) state[key] = blank();
+      const card = document.createElement("article");
+      card.className = "bean";
+      card.dataset.key = key;
+      card.innerHTML = `<p class="bean-name">${esc(it.name)}</p>
+        <div class="scale" role="radiogroup" aria-label="焙煎度">${ROASTS.map(r => swatch(r, key)).join("")}</div>
+        <p class="roast-label empty">焙煎度を選んでください</p>
+        <div class="rows off">
+          ${sizeRow(key, "s250", "250g", it.price)}
+          ${sizeRow(key, "s500", "500g", price500(it.price))}
+        </div>
+        <div class="picked"></div>`;
+      sec.appendChild(card);
+    });
+    frag.appendChild(sec);
+  });
+  Object.keys(state).forEach(k => { if(!valid.has(k)) delete state[k]; });   // 旧リストの残りを捨てる
+  listEl.innerHTML = "";
+  listEl.appendChild(frag);
+  refresh();
+}
+
+function lines(){                   // 選択中の明細（銘柄順 → 焙煎度順 → 250g, 500g）
+  const out = [];
+  visibleGroups().forEach(g => g.items.forEach(it => {
+    const s = state[keyOf(g.country, it.name)];
+    if(!s) return;
+    ROASTS.forEach(r => {
+      const q = s.q[r.n];
+      if(!q) return;
+      if(q.s250 > 0) out.push({ country: g.country, name: it.name, roast: r, size: "250g", n: q.s250, sub: it.price * q.s250 });
+      if(q.s500 > 0) out.push({ country: g.country, name: it.name, roast: r, size: "500g", n: q.s500, sub: price500(it.price) * q.s500 });
+    });
+  }));
+  return out;
+}
+
+function refresh(){
+  listEl.querySelectorAll(".bean").forEach(card => {
+    const s = state[card.dataset.key] || blank();
+    const a = s.active ? ROAST[s.active] : null;
+    card.querySelectorAll(".sw").forEach(b => {
+      const on = a && Number(b.dataset.n) === a.n;
+      b.classList.toggle("on", !!on);
+      b.setAttribute("aria-checked", on ? "true" : "false");
+    });
+    const lab = card.querySelector(".roast-label");
+    if(a){ lab.classList.remove("empty"); lab.innerHTML = `<span class="num">${a.n}</span>${a.name}（${a.ja}）`; }
+    else { lab.classList.add("empty"); lab.textContent = "焙煎度を選んでください"; }
+    card.querySelector(".rows").classList.toggle("off", !a);
+    const q = a ? (s.q[a.n] || { s250: 0, s500: 0 }) : { s250: 0, s500: 0 };
+    card.querySelectorAll(".count").forEach(el => {
+      const n = q[el.dataset.count] || 0;
+      el.textContent = n;
+      el.classList.toggle("on", n > 0);
+    });
+    // この銘柄で入っている焙煎度の一覧（タップで切り替え）
+    let any = false;
+    const chips = ROASTS.map(r => {
+      const qq = s.q[r.n];
+      if(!qq || (!qq.s250 && !qq.s500)) return "";
+      any = true;
+      const parts = [];
+      if(qq.s250) parts.push("250g×" + qq.s250);
+      if(qq.s500) parts.push("500g×" + qq.s500);
+      return `<button type="button" class="pick${a && a.n === r.n ? " on" : ""}" data-key="${esc(card.dataset.key)}" data-n="${r.n}" style="--c:${r.color}"><span class="dot"></span>${r.mark}${r.short}　${parts.join(" / ")}</button>`;
+    }).join("");
+    card.querySelector(".picked").innerHTML = chips;
+    card.classList.toggle("selected", any);
+  });
+  const L = lines();
+  const total = L.reduce((a, l) => a + l.sub, 0);
+  const count = L.reduce((a, l) => a + l.n, 0);
+  barCount.textContent = count ? count + "点" : "まだ選択なし";
+  barSum.textContent = yen(total);
+  openBtn.disabled = count === 0;
+  if(!sheet.hidden) updateOrderText();
+}
+
+listEl.addEventListener("click", e => {
+  const sw = e.target.closest(".sw, .pick");
+  if(sw){
+    const s = state[sw.dataset.key]; if(!s) return;
+    s.active = Number(sw.dataset.n);
+    refresh(); save();
+    return;
+  }
+  const b = e.target.closest(".step");
+  if(!b) return;
+  const s = state[b.dataset.key]; if(!s) return;
+  if(!s.active){
+    const sc = b.closest(".bean").querySelector(".scale");
+    sc.classList.remove("nudge"); void sc.offsetWidth; sc.classList.add("nudge");
+    toast("先に焙煎度（1〜8）を選んでください");
+    return;
+  }
+  const q = qOf(s, s.active);
+  q[b.dataset.size] = Math.max(0, Math.min(20, (q[b.dataset.size] || 0) + Number(b.dataset.d)));
+  if(!q.s250 && !q.s500) delete s.q[s.active];
+  refresh(); save();
+});
+
+function buildOrderText(){
+  const d = new Date();
+  const ds = d.getFullYear() + "/" + String(d.getMonth() + 1).padStart(2, "0") + "/" + String(d.getDate()).padStart(2, "0");
+  const out = ["【焙煎注文】" + ds, "お名前：" + nameIn.value.trim(), ""];
+  let last = null, total = 0, count = 0;
+  lines().forEach(l => {
+    const head = l.country + " " + l.name;
+    if(head !== last){ out.push("■" + head); last = head; }
+    out.push("　" + l.roast.mark + l.roast.name + "　" + l.size + "×" + l.n + "　" + yenJa(l.sub));
+    total += l.sub; count += l.n;
+  });
+  out.push("", "合計：" + yenJa(total) + "（" + count + "点）");
+  const memo = memoIn.value.trim();
+  if(memo) out.push("備考：" + memo);
+  return out.join("\n");
+}
+function updateOrderText(){
+  const t = buildOrderText();
+  orderText.value = t;
+  lineBtn.href = "https://line.me/R/share?text=" + encodeURIComponent(t);
+}
+
+function openSheet(){ updateOrderText(); sheet.hidden = false; document.body.style.overflow = "hidden"; }
+function closeSheet(){ sheet.hidden = true; document.body.style.overflow = ""; }
+openBtn.addEventListener("click", openSheet);
+$("closeBtn").addEventListener("click", closeSheet);
+sheet.addEventListener("click", e => { if(e.target === sheet) closeSheet(); });
+document.addEventListener("keydown", e => { if(e.key === "Escape" && !sheet.hidden) closeSheet(); });
+nameIn.addEventListener("input", () => { updateOrderText(); save(); });
+memoIn.addEventListener("input", () => { updateOrderText(); save(); });
+
+$("copyBtn").addEventListener("click", async () => {
+  const t = orderText.value;
+  let ok = false;
+  try{ await navigator.clipboard.writeText(t); ok = true; }catch(e){}
+  if(!ok){
+    try{ orderText.focus(); orderText.select(); orderText.setSelectionRange(0, t.length); ok = document.execCommand("copy"); }catch(e){}
+  }
+  toast(ok ? "コピーしました。LINEに貼り付けて送ってください" : "コピーできませんでした。注文文を長押しで選択してください");
+});
+
+$("clearBtn").addEventListener("click", () => {
+  if(!confirm("選択をすべてクリアしますか？")) return;
+  Object.keys(state).forEach(k => { state[k] = blank(); });
+  save();
+  refresh();
+  closeSheet();
+});
+
+let toastTimer;
+function toast(msg){
+  const el = $("toast");
+  el.textContent = msg;
+  el.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove("show"), 2600);
+}
+
+load();
+render();
+</script>
+</body>
+</html>
