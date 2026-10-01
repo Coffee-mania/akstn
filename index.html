@@ -23,7 +23,7 @@
   --sheet:#eef0e9; --card:#f8f8f4; --well:#e4e7dd;
   --bean:#8fa483; --bean2:#5f7454; --bean3:#eef2ea; --jute:#c9b893; --jute2:#e0d7c2;
   --ink:#2b211b; --ink2:#6e655c; --ink3:#9b9187;
-  --line-green:#06c755;
+  --line-green:#06c755; --warn:#a2512b;
   --disp:"Kaisei Tokumin","Hiragino Mincho ProN","Yu Mincho","Noto Serif JP",serif;
   --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
   --sans:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP","Yu Gothic UI",system-ui,sans-serif;
@@ -142,6 +142,50 @@ textarea.in{resize:vertical;min-height:250px;background:var(--card);font-size:14
 .clear{margin-top:14px;text-align:center}
 .clear button{background:none;border:0;color:var(--ink3);font-size:12px;text-decoration:underline;cursor:pointer;padding:6px}
 
+/* ---------- 在庫（お客さん画面） ---------- */
+.stock{margin:-4px 0 6px;font-size:12px;color:var(--ink2);display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline}
+.stock[hidden]{display:none}
+.stock b{font-family:var(--mono);font-weight:500;color:var(--ink);font-variant-numeric:tabular-nums}
+.stock.low b{color:var(--warn)}
+.stock .use{color:var(--bean2)}
+.over{margin:2px 0 4px;font-size:12px;color:var(--warn);font-weight:600}
+.over[hidden]{display:none}
+.soldtag{display:inline-block;margin-left:8px;padding:0 6px;border:1px solid var(--ink2);border-radius:3px;font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:.14em;color:var(--ink2);vertical-align:2px}
+.soldtag[hidden]{display:none}
+.bean.soldout{background:transparent;border-style:dashed}
+.bean.soldout .bean-name{color:var(--ink2)}
+.bean.soldout .scale,.bean.soldout .roast-label,.bean.soldout .rows,.bean.soldout .picked,.bean.soldout .stock{display:none}
+
+/* ---------- 在庫入力（?admin） ---------- */
+.admin[hidden]{display:none}
+.admin{margin-top:18px}
+.admin-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;padding-bottom:6px;border-bottom:1px solid var(--ink)}
+.admin-head h2{margin:0;font-family:var(--disp);font-weight:700;font-size:21px;letter-spacing:.1em}
+.admin-head a{font-size:12px;color:var(--bean2)}
+.adm-status{margin:10px 0 0;padding:9px 12px;border-radius:6px;background:var(--well);font-size:12.5px;line-height:1.7}
+.adm-status.err{background:#f3e3da;color:#7a3416}
+.tok{margin-top:10px;border:1px solid var(--jute2);border-radius:6px;background:var(--card)}
+.tok summary{cursor:pointer;padding:9px 12px;font-size:13px;font-weight:600}
+.tok-in{padding:0 12px 12px}
+.tok-row{display:flex;gap:8px;margin-top:4px}
+.tok-row .in{flex:1;min-width:0;font-family:var(--mono);font-size:14px}
+.btn-sub{background:#fff;border:1px solid var(--jute);color:var(--ink);padding:10px 14px}
+.linklike{background:none;border:0;padding:6px 0 0;color:var(--ink3);font-size:12px;text-decoration:underline;cursor:pointer}
+.adm-country{margin:22px 0 0;font-family:var(--disp);font-size:17px;letter-spacing:.1em;border-bottom:1px dotted var(--jute);padding-bottom:4px}
+.arow{background:var(--card);border:1px solid var(--jute2);border-left:4px solid var(--jute2);border-radius:6px;padding:10px 12px;margin-top:8px}
+.arow.changed{border-left-color:var(--bean2);border-color:var(--bean)}
+.aname{margin:0 0 6px;font-size:14px;font-weight:600;line-height:1.5}
+.actl{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.ain{width:120px;font:500 18px/1.3 var(--mono);text-align:right;padding:8px 10px;border:1px solid var(--jute);border-radius:4px;background:#fff;color:var(--ink);font-variant-numeric:tabular-nums}
+.unit{font-family:var(--mono);font-size:13px;color:var(--ink2)}
+.was{font-size:11px;color:var(--ink3);margin-left:auto}
+.quick{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}
+.quick button{border:1px solid var(--jute);background:#fff;border-radius:999px;padding:5px 8px;font:500 12px/1.2 var(--mono);color:var(--ink);cursor:pointer;-webkit-tap-highlight-color:transparent}
+.quick button:active{background:var(--bean);border-color:var(--bean)}
+.quick .zero{color:var(--warn);border-color:#d9b9a8}
+body.admin-mode .legend,body.admin-mode #list,body.admin-mode .foot,body.admin-mode #orderBar,body.admin-mode .lead{display:none}
+#admBar[hidden]{display:none}
+
 .toast{position:fixed;left:50%;bottom:calc(108px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(6px);background:var(--ink);color:var(--sheet);padding:9px 16px;border-radius:4px;font-size:13px;opacity:0;transition:opacity .2s,transform .2s;pointer-events:none;z-index:40;white-space:nowrap;max-width:92vw}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 @media (prefers-reduced-motion:reduce){ *{transition:none!important;animation:none!important} }
@@ -152,8 +196,25 @@ textarea.in{resize:vertical;min-height:250px;background:var(--card);font-size:14
   <header class="top">
     <p class="stamp"><span>Green bean stock</span><b id="updated"></b></p>
     <h1>焙煎注文票</h1>
-    <p class="lead">銘柄ごとに焙煎度（1〜8）を選んでから、250g／500gの数量を＋で入れます。同じ銘柄で焙煎度を変えて複数注文もできます。価格は生豆250gあたり、焙煎代込み。500gは250g価格×2−200円。最後に「注文内容を作成」を押すと、LINEに貼って送れる注文文ができます。</p>
+    <p class="lead">銘柄ごとに焙煎度（1〜8）を選んでから、250g／500gの数量を＋で入れます。同じ銘柄で焙煎度を変えて複数注文もできます。価格は生豆250gあたり、焙煎代込み。500gは250g価格×2−200円。最後に「注文内容を作成」を押すと、LINEに貼って送れる注文文ができます。在庫（生豆の残量）が表示されている銘柄は、残量を超えては注文できません。</p>
   </header>
+
+  <section class="admin" id="admin" hidden>
+    <div class="admin-head"><h2>在庫入力</h2><a href="./">お客さん画面で確認 →</a></div>
+    <p class="adm-status" id="admStatus">読み込み中…</p>
+    <details class="tok" id="tokBox">
+      <summary>GitHubトークンの設定</summary>
+      <div class="tok-in">
+        <label class="f" for="tokIn">TOKEN（github_pat_… で始まる文字列）</label>
+        <div class="tok-row">
+          <input class="in" id="tokIn" type="password" autocomplete="off" spellcheck="false" placeholder="github_pat_...">
+          <button class="btn btn-sub" id="tokSave" type="button">保存</button>
+        </div>
+        <p class="hint">トークンはこの端末のブラウザにだけ保存され、ページやGitHubには公開されません。必要な権限は Coffee-mania/akstn の「Contents: Read and write」だけです。<br><button type="button" class="linklike" id="tokDel">この端末からトークンを削除</button></p>
+      </div>
+    </details>
+    <div id="admList"></div>
+  </section>
 
   <details class="legend" id="legend">
     <summary><span class="mark">Roast level</span>焙煎度の目安（8段階）</summary>
@@ -164,18 +225,28 @@ textarea.in{resize:vertical;min-height:250px;background:var(--card);font-size:14
 
   <footer class="foot">
     <span class="mono">PRICING</span>　生豆単価（250gあたり）×1.5＋300〜350円を50円単位に調整。<br>
-    銘柄・価格は生豆の仕入れ状況により変わります。<br>
+    銘柄・価格は生豆の仕入れ状況により変わります。在庫は生豆の残量の目安で、注文が重なった場合はご希望に添えないことがあります。<br>
     香味・焙煎度・担当コメントは仕入元「海ノ向こうコーヒー」の商品情報をもとにした要約です。
   </footer>
 </div>
 
-<div class="bar">
+<div class="bar" id="orderBar">
   <div class="bar-in">
     <div class="bar-total">
       <span class="bar-count" id="barCount">まだ選択なし</span>
       <span class="bar-sum" id="barSum">¥0</span>
     </div>
     <button class="btn btn-primary" id="openBtn" type="button" disabled>注文内容を作成</button>
+  </div>
+</div>
+
+<div class="bar" id="admBar" hidden>
+  <div class="bar-in">
+    <div class="bar-total">
+      <span class="bar-count">STOCK EDIT</span>
+      <span class="bar-sum" id="admCount" style="font-size:18px">変更なし</span>
+    </div>
+    <button class="btn btn-primary" id="admSave" type="button" disabled>GitHubに保存</button>
   </div>
 </div>
 
@@ -209,8 +280,16 @@ textarea.in{resize:vertical;min-height:250px;background:var(--card);font-size:14
    価格ルール：生豆1kg単価 ÷ 4 × 1.5 ＋ 300〜350円 → 50円単位に丸め
    売り切れ → その行を消す。新しい国 → { country: "国名", items: [...] } を追加。
    price が無い／0 の銘柄はページに表示されません。
+
+   在庫（生豆の残量g）はこのファイルではなく stock.json に入っています。
+   入力はページのURLの末尾に ?admin を付けて開く → 数字を入れて「GitHubに保存」。
+   例：https://coffee-mania.github.io/akstn/?admin
+   在庫が未入力の銘柄は残量表示なし・注文上限なし、0g は「売り切れ」表示になります。
    ============================================================ */
 const UPDATED = "2026.08.20";
+
+/* 在庫ファイルの保存先（GitHub） */
+const REPO = { owner: "Coffee-mania", repo: "akstn", branch: "main", path: "stock.json" };
 
 const BEANS = [
   { country: "エチオピア", items: [
@@ -403,7 +482,9 @@ const EN = {
    「おすすめ焙煎度」「フレーバーノート」「Light/Medium/Dark Roast」「品質担当コメント」を要約して
    各銘柄に rec:[低,高] と info:{roast, flavor, notes, qc} を追記する（このファイルの上2銘柄が見本）。
    rec の対応：ライト1／シナモン2／ミディアム3／ハイ4／シティ5／フルシティ6／フレンチ7／イタリアン8
-   c_id：エチオピア26 ウガンダ72 ルワンダ61 ニカラグア60 ケニア27 インド43 コロンビア33 ザンビア138 イエメン18 */
+   c_id：エチオピア26 ウガンダ72 ルワンダ61 ニカラグア60 ケニア27 インド43 コロンビア33 ザンビア138 イエメン18
+   在庫（Claude向けメモ）：stock.json = { updated, grams: { "国名｜銘柄名": 生豆g } }。キーは国名と name の組なので、
+   銘柄名を変えるとその銘柄の在庫は「未入力」に戻る（?admin で入れ直す）。注文が来ても在庫は自動では減らない。 */
 
 /* 焙煎度 8段階（浅 → 深） */
 const ROASTS = [
@@ -434,6 +515,51 @@ let state = {};   // key -> { active: 1..8|null, q: { [n]: { s250, s500 } } }
 
 const blank = () => ({ active: null, q: {} });
 const qOf = (s, n) => (s.q[n] = s.q[n] || { s250: 0, s500: 0 });
+
+/* ---------- 在庫 ---------- */
+const ADMIN = new URLSearchParams(location.search).has("admin") || location.hash === "#admin";
+const GRAMS = { s250: 250, s500: 500 };
+let STOCK = null;            // { updated: ISO文字列, grams: { key: 数値 } } ／ 読めなければ null（在庫表示なし）
+let stockFetchedAt = 0;
+
+const stockOf = key => {     // 数値なら管理中、null なら未入力（上限なし）
+  const g = STOCK && STOCK.grams ? STOCK.grams[key] : undefined;
+  return typeof g === "number" && isFinite(g) ? Math.max(0, g) : null;
+};
+const isSoldOut = key => stockOf(key) === 0;
+const usedOf = s => Object.values((s && s.q) || {}).reduce((a, q) => a + (q.s250 || 0) * 250 + (q.s500 || 0) * 500, 0);
+const fmtG = g => g >= 1000 ? "約" + (Math.round(g / 100) / 10).toLocaleString("ja-JP") + "kg" : g.toLocaleString("ja-JP") + "g";
+function fmtStamp(iso){
+  const d = new Date(iso);
+  if(isNaN(d)) return "";
+  const p = n => String(n).padStart(2, "0");
+  return d.getFullYear() + "." + p(d.getMonth() + 1) + "." + p(d.getDate()) + " " + p(d.getHours()) + ":" + p(d.getMinutes());
+}
+function normalizeStock(d){
+  if(!d || typeof d !== "object") return null;
+  return { updated: typeof d.updated === "string" ? d.updated : "", grams: d.grams && typeof d.grams === "object" ? d.grams : {} };
+}
+
+async function loadStock(){  // GitHub Pages 上の stock.json（キャッシュを避けるため毎回URLを変える）
+  try{
+    const r = await fetch(REPO.path + "?t=" + Date.now(), { cache: "no-store" });
+    if(!r.ok) throw new Error(r.status);
+    STOCK = normalizeStock(await r.json());
+  }catch(e){ STOCK = null; }
+  stockFetchedAt = Date.now();
+}
+function applyStock(){       // 売り切れになった銘柄はカートから外す
+  let dropped = 0;
+  Object.keys(state).forEach(k => {
+    if(isSoldOut(k) && usedOf(state[k]) > 0){ state[k] = blank(); dropped++; }
+  });
+  if(dropped){ save(); toast("売り切れになった銘柄を注文から外しました"); }
+  stamp();
+  refresh();
+}
+function stamp(){
+  $("updated").textContent = STOCK && fmtStamp(STOCK.updated) ? "在庫 " + fmtStamp(STOCK.updated) : UPDATED;
+}
 
 function load(){                    // 端末内に選択内容を保持（LINEとの行き来で消えないように）
   try{
@@ -477,7 +603,7 @@ function renderLegend(){
 }
 
 function render(){
-  $("updated").textContent = UPDATED;
+  stamp();
   renderLegend();
   const valid = new Set();
   const frag = document.createDocumentFragment();
@@ -494,14 +620,16 @@ function render(){
       card.className = "bean";
       card.dataset.key = key;
       const info = it.info ? `<button type="button" class="info-btn" aria-expanded="false">香味・担当コメント</button><dl class="info"><dt>おすすめ焙煎度（仕入元・●印）</dt><dd>${esc(it.info.roast)}</dd><dt>フレーバー</dt><dd>${esc(it.info.flavor)}</dd>${it.info.notes ? `<dt>焙煎ごとの傾向</dt><dd>${esc(it.info.notes)}</dd>` : ""}<dt>品質担当コメントの要約</dt><dd class="qc">${esc(it.info.qc)}</dd></dl>` : "";
-      card.innerHTML = `<p class="bean-name">${esc(it.name)}</p>${info}
+      card.innerHTML = `<p class="bean-name">${esc(it.name)}<span class="soldtag" hidden>売り切れ</span></p>
+        <p class="stock" hidden></p>${info}
         <div class="scale" role="radiogroup" aria-label="焙煎度">${ROASTS.map(r => swatch(r, key, it.rec)).join("")}</div>
         <p class="roast-label empty">焙煎度を選んでください</p>
         <div class="rows off">
           ${sizeRow(key, "s250", "250g", it.price)}
           ${sizeRow(key, "s500", "500g", price500(it.price))}
         </div>
-        <div class="picked"></div>`;
+        <div class="picked"></div>
+        <p class="over" hidden></p>`;
       sec.appendChild(card);
     });
     frag.appendChild(sec);
@@ -515,8 +643,9 @@ function render(){
 function lines(){                   // 選択中の明細（銘柄順 → 焙煎度順 → 250g, 500g）
   const out = [];
   visibleGroups().forEach(g => g.items.forEach(it => {
-    const s = state[keyOf(g.country, it.name)];
-    if(!s) return;
+    const k = keyOf(g.country, it.name);
+    const s = state[k];
+    if(!s || isSoldOut(k)) return;
     ROASTS.forEach(r => {
       const q = s.q[r.n];
       if(!q) return;
@@ -528,8 +657,26 @@ function lines(){                   // 選択中の明細（銘柄順 → 焙煎
 }
 
 function refresh(){
+  let overAny = false;
   listEl.querySelectorAll(".bean").forEach(card => {
     const s = state[card.dataset.key] || blank();
+    // 在庫表示
+    const g = stockOf(card.dataset.key);
+    const used = usedOf(s);
+    const sold = g === 0;
+    const over = g !== null && !sold && used > g;
+    if(over) overAny = true;
+    card.classList.toggle("soldout", sold);
+    card.querySelector(".soldtag").hidden = !sold;
+    const st = card.querySelector(".stock");
+    st.hidden = g === null || sold;
+    if(g !== null && !sold){
+      st.classList.toggle("low", g < 1000);
+      st.innerHTML = `<span>在庫 <b>${fmtG(g)}</b>${g < 1000 ? "（残りわずか）" : ""}</span>${used ? `<span class="use">選択中 ${used.toLocaleString("ja-JP")}g</span>` : ""}`;
+    }
+    const ov = card.querySelector(".over");
+    ov.hidden = !over;
+    if(over) ov.textContent = `在庫（${g.toLocaleString("ja-JP")}g）を超えています。数量を減らしてください。`;
     const a = s.active ? ROAST[s.active] : null;
     card.querySelectorAll(".sw").forEach(b => {
       const on = a && Number(b.dataset.n) === a.n;
@@ -563,9 +710,9 @@ function refresh(){
   const L = lines();
   const total = L.reduce((a, l) => a + l.sub, 0);
   const count = L.reduce((a, l) => a + l.n, 0);
-  barCount.textContent = count ? count + "点" : "まだ選択なし";
+  barCount.textContent = overAny ? "在庫を超えた銘柄があります" : count ? count + "点" : "まだ選択なし";
   barSum.textContent = yen(total);
-  openBtn.disabled = count === 0;
+  openBtn.disabled = count === 0 || overAny;
   if(!sheet.hidden) updateOrderText();
 }
 
@@ -594,7 +741,15 @@ listEl.addEventListener("click", e => {
     return;
   }
   const q = qOf(s, s.active);
-  q[b.dataset.size] = Math.max(0, Math.min(20, (q[b.dataset.size] || 0) + Number(b.dataset.d)));
+  const d = Number(b.dataset.d);
+  const g = stockOf(b.dataset.key);
+  if(d > 0 && g !== null && usedOf(s) + GRAMS[b.dataset.size] > g){
+    if(!q.s250 && !q.s500) delete s.q[s.active];
+    const left = Math.max(0, g - usedOf(s));
+    toast(left > 0 ? `在庫が足りません（あと${left.toLocaleString("ja-JP")}gまで）` : "この銘柄は在庫分まで選択済みです");
+    return;
+  }
+  q[b.dataset.size] = Math.max(0, Math.min(20, (q[b.dataset.size] || 0) + d));
   if(!q.s250 && !q.s500) delete s.q[s.active];
   refresh(); save();
 });
@@ -657,8 +812,213 @@ function toast(msg){
   toastTimer = setTimeout(() => el.classList.remove("show"), 2600);
 }
 
+/* ===================== 在庫入力（URLに ?admin） ===================== */
+const TOKEN_KEY = "roastOrder.ghToken";
+const API = `https://api.github.com/repos/${REPO.owner}/${REPO.repo}/contents/${REPO.path}`;
+const adm = { saved: {}, draft: {}, sha: null, canWrite: false, busy: false };
+
+const getToken = () => { try{ return localStorage.getItem(TOKEN_KEY) || ""; }catch(e){ return ""; } };
+const setToken = t => { try{ t ? localStorage.setItem(TOKEN_KEY, t) : localStorage.removeItem(TOKEN_KEY); }catch(e){} };
+const b64enc = str => { let bin = ""; new TextEncoder().encode(str).forEach(b => { bin += String.fromCharCode(b); }); return btoa(bin); };
+const b64dec = b64 => new TextDecoder().decode(Uint8Array.from(atob(b64.replace(/\s/g, "")), c => c.charCodeAt(0)));
+const ghHeaders = () => ({ "Accept": "application/vnd.github+json", "Authorization": "Bearer " + getToken(), "X-GitHub-Api-Version": "2022-11-28" });
+const savedOf = k => typeof adm.saved[k] === "number" ? adm.saved[k] : null;
+const admChanges = () => Object.keys(adm.draft).filter(k => (adm.draft[k] ?? null) !== savedOf(k));
+const admRows = () => [...$("admList").querySelectorAll(".arow")];
+function isoLocal(d){
+  const p = n => String(Math.floor(Math.abs(n))).padStart(2, "0");
+  const off = -d.getTimezoneOffset();
+  return d.getFullYear() + "-" + p(d.getMonth() + 1) + "-" + p(d.getDate()) + "T" + p(d.getHours()) + ":" + p(d.getMinutes()) + ":" + p(d.getSeconds())
+       + (off >= 0 ? "+" : "-") + p(off / 60) + ":" + p(off % 60);
+}
+function admStatus(msg, err){ const el = $("admStatus"); el.textContent = msg; el.classList.toggle("err", !!err); }
+
+async function admFetch(){
+  adm.canWrite = false;
+  if(!getToken()){
+    await loadStock();
+    adm.saved = STOCK ? { ...STOCK.grams } : {};
+    adm.sha = null;
+    stamp();
+    $("tokBox").open = true;
+    admStatus("閲覧のみです。保存するには「GitHubトークンの設定」にトークンを入れてください（初回だけ）。", true);
+    return;
+  }
+  admStatus("GitHubから最新の在庫を読み込み中…");
+  try{
+    const r = await fetch(API + "?ref=" + encodeURIComponent(REPO.branch) + "&t=" + Date.now(), { headers: ghHeaders(), cache: "no-store" });
+    if(r.status === 401){ $("tokBox").open = true; admStatus("トークンが無効か期限切れです。新しいトークンを入れ直してください。", true); return; }
+    if(r.status === 404){
+      adm.saved = {}; adm.sha = null; adm.canWrite = true;
+      admStatus("stock.json はまだありません。数字を入れて「GitHubに保存」を押すと作成されます。");
+      return;
+    }
+    if(!r.ok) throw new Error("HTTP " + r.status);
+    const j = await r.json();
+    const d = normalizeStock(JSON.parse(b64dec(j.content)));
+    adm.saved = { ...d.grams }; adm.sha = j.sha; adm.canWrite = true; STOCK = d;
+    stamp();
+    admStatus("最終更新 " + (fmtStamp(d.updated) || "不明") + "。数字を変えて「GitHubに保存」を押してください。");
+  }catch(e){
+    admStatus("読み込みに失敗しました（" + e.message + "）。通信状況を確認してページを再読み込みしてください。", true);
+  }
+}
+
+function admRender(){
+  adm.draft = {};
+  let html = "";
+  visibleGroups().forEach(g => {
+    html += `<h3 class="adm-country">${esc(g.country)}</h3>`;
+    g.items.forEach(it => {
+      const k = keyOf(g.country, it.name);
+      const v = savedOf(k);
+      adm.draft[k] = v;
+      html += `<div class="arow" data-key="${esc(k)}">
+        <p class="aname">${esc(it.name)}</p>
+        <div class="actl">
+          <input class="ain" type="number" inputmode="numeric" min="0" step="50" placeholder="未入力" value="${v ?? ""}" aria-label="${esc(it.name)} の在庫（g）">
+          <span class="unit">g</span><span class="was"></span>
+        </div>
+        <div class="quick">
+          <button type="button" data-d="-500">−500</button><button type="button" data-d="-250">−250</button>
+          <button type="button" data-d="250">＋250</button><button type="button" data-d="1000">＋1kg</button>
+          <button type="button" class="zero" data-set="0">売切(0)</button>
+        </div>
+      </div>`;
+    });
+  });
+  $("admList").innerHTML = html;
+  admRefresh();
+}
+
+function admRefresh(){
+  admRows().forEach(row => {
+    const k = row.dataset.key;
+    const was = savedOf(k);
+    const changed = (adm.draft[k] ?? null) !== was;
+    row.classList.toggle("changed", changed);
+    row.querySelector(".was").textContent = changed ? "保存済み " + (was === null ? "未入力" : was.toLocaleString("ja-JP") + "g") : "";
+  });
+  const n = admChanges().length;
+  $("admCount").textContent = n ? n + "件 変更" + (adm.canWrite ? "" : "（保存不可）") : "変更なし";
+  $("admSave").disabled = !n || !adm.canWrite || adm.busy;
+  $("admSave").textContent = adm.busy ? "保存中…" : "GitHubに保存";
+}
+
+function admSetDraft(k, v){
+  adm.draft[k] = v;
+  const row = admRows().find(r => r.dataset.key === k);
+  if(row) row.querySelector(".ain").value = v ?? "";
+}
+
+async function admReload(){     // 入力途中の変更は残したまま、GitHub上の最新を読み直す
+  const keep = {};
+  admChanges().forEach(k => { keep[k] = adm.draft[k]; });
+  await admFetch();
+  admRender();
+  Object.keys(keep).forEach(k => { if(k in adm.draft) admSetDraft(k, keep[k]); });
+  admRefresh();
+}
+
+async function admSave(){
+  const ch = admChanges();
+  if(!ch.length || adm.busy || !adm.canWrite) return;
+  adm.busy = true; admRefresh();
+  admStatus("保存中…");
+  const grams = {};
+  Object.keys(adm.draft).forEach(k => { if(typeof adm.draft[k] === "number") grams[k] = adm.draft[k]; });
+  const body = { updated: isoLocal(new Date()), grams };
+  const payload = {
+    message: "在庫更新 " + fmtStamp(body.updated) + "（" + ch.length + "件）",
+    content: b64enc(JSON.stringify(body, null, 2) + "\n"),
+    branch: REPO.branch,
+  };
+  if(adm.sha) payload.sha = adm.sha;
+  let reload = false;
+  try{
+    const r = await fetch(API, { method: "PUT", headers: { ...ghHeaders(), "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+    if(r.status === 409 || r.status === 422){
+      reload = true;
+      admStatus("別の端末で先に更新されていました。最新を読み込み直したので、内容を確認してもう一度保存してください。", true);
+    }else if(r.status === 401){
+      admStatus("トークンが無効か期限切れです。新しいトークンを入れ直してください。", true);
+      $("tokBox").open = true;
+    }else if(r.status === 403 || r.status === 404){
+      admStatus("このトークンでは " + REPO.owner + "/" + REPO.repo + " に書き込めません。トークンの対象リポジトリと「Contents: Read and write」権限を確認してください。", true);
+    }else if(!r.ok){
+      throw new Error("HTTP " + r.status);
+    }else{
+      const j = await r.json();
+      adm.sha = j.content && j.content.sha;
+      adm.saved = { ...grams };
+      STOCK = body;
+      stamp();
+      admStatus("保存しました（" + fmtStamp(body.updated) + "）。お客さん画面には1〜2分で反映されます。");
+      toast("GitHubに保存しました");
+    }
+  }catch(e){
+    admStatus("保存に失敗しました（" + e.message + "）。通信状況を確認してもう一度押してください。", true);
+  }
+  adm.busy = false;
+  if(reload){
+    const keep = {};
+    ch.forEach(k => { keep[k] = adm.draft[k]; });
+    await admFetch();
+    admRender();
+    Object.keys(keep).forEach(k => { if(k in adm.draft) admSetDraft(k, keep[k]); });
+    admStatus("別の端末で先に更新されていました。最新を読み込み直したうえで、今回の入力を上書きしてあります。内容を確認してもう一度保存してください。", true);
+  }
+  admRefresh();
+}
+
+function initAdmin(){
+  document.body.classList.add("admin-mode");
+  document.title = "在庫入力｜焙煎注文票";
+  $("admin").hidden = false;
+  $("admBar").hidden = false;
+  $("admList").addEventListener("input", e => {
+    const inp = e.target.closest(".ain"); if(!inp) return;
+    const k = inp.closest(".arow").dataset.key;
+    const raw = inp.value.trim();
+    if(raw === ""){ adm.draft[k] = null; }
+    else{ const n = Number(raw); if(!isFinite(n)) return; adm.draft[k] = Math.max(0, Math.round(n)); }
+    admRefresh();
+  });
+  $("admList").addEventListener("click", e => {
+    const b = e.target.closest(".quick button"); if(!b) return;
+    const k = b.closest(".arow").dataset.key;
+    const v = b.dataset.set !== undefined ? Number(b.dataset.set) : Math.max(0, (adm.draft[k] ?? 0) + Number(b.dataset.d));
+    admSetDraft(k, v);
+    admRefresh();
+  });
+  $("admSave").addEventListener("click", admSave);
+  $("tokSave").addEventListener("click", () => {
+    const t = $("tokIn").value.trim();
+    if(!t){ toast("トークンを貼り付けてください"); return; }
+    setToken(t);
+    $("tokIn").value = "";
+    $("tokBox").open = false;
+    admReload();
+  });
+  $("tokDel").addEventListener("click", () => {
+    if(!confirm("この端末からトークンを削除しますか？")) return;
+    setToken("");
+    admReload();
+  });
+  window.addEventListener("beforeunload", e => { if(admChanges().length){ e.preventDefault(); e.returnValue = ""; } });
+  admReload();
+}
+
 load();
 render();
+if(ADMIN){
+  initAdmin();
+}else{
+  loadStock().then(applyStock);
+  document.addEventListener("visibilitychange", () => {   // LINEから戻ってきたときなどに在庫を取り直す
+    if(document.visibilityState === "visible" && Date.now() - stockFetchedAt > 120000) loadStock().then(applyStock);
+  });
+}
 </script>
 </body>
 </html>
